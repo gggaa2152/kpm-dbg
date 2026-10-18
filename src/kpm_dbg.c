@@ -20,6 +20,7 @@
 #include <ktypes.h>
 #include <kputils.h>
 #include <kallsyms.h>
+#include <log.h>
 #include <common.h>
 #include <hook.h>
 #include <syscall.h>
@@ -159,10 +160,10 @@ static int pgtable_init(void)
     else
         g_page_offset = (0xffffffffffffffffULL - (1ULL << (g_va_bits - 1)) + 1);
 
-    g_memstart_addr = (uint64_t *)kallsyms_lookup_name("memstart_addr");
-    if (!g_memstart_addr)
+    k_memstart_addr = (uint64_t *)kallsyms_lookup_name("memstart_addr");
+    if (!k_memstart_addr)
         return -1;
-    g_phys_offset = *g_memstart_addr;
+    g_phys_offset = *k_memstart_addr;
 
     g_page_size = 1ULL << g_page_shift;
     g_page_size_mask = ~(g_page_size - 1);
