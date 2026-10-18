@@ -1,0 +1,38 @@
+name: build-kpm
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Install cross toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
+      - name: Fetch KernelPatch source (headers only)
+        run: |
+          git clone --depth 1 https://github.com/bmax121/KernelPatch.git kp
+          echo "KP_DIR=$PWD/kp" >> $GITHUB_ENV
+
+      - name: Build kpm_dbg.kpm
+        run: |
+          make TARGET_COMPILE=aarch64-linux-gnu- KP_DIR="$KP_DIR"
+
+      - name: Show result
+        run: |
+          ls -la *.kpm
+          file kpm_dbg.kpm || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kpm_dbg
+          path: kpm_dbg.kpm
